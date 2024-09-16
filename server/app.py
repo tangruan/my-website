@@ -1,15 +1,25 @@
+import eventlet
+eventlet.monkey_patch()  # 确保这行在其他导入之前
+
 from flask import Flask, request, jsonify, send_file, send_from_directory
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, emit
 from gtts import gTTS
 import os
 import uuid
 import librosa
 import numpy as np
+import websocket
+import json
+import base64
+import hmac
+import hashlib
+import datetime
+import requests
 
 app = Flask(__name__)
-CORS(app)
-socketio = SocketIO(app, cors_allowed_origins="*")
+CORS(app, resources={r"/*": {"origins": "*"}})  # 允许所有来源的跨域请求
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
 AUDIO_DIR = os.path.join(os.path.dirname(__file__), '..', 'audio_files')
 TEMP_DIR = os.path.join(os.path.dirname(__file__), '..', 'temp')
@@ -19,30 +29,45 @@ for directory in [AUDIO_DIR, TEMP_DIR, UPLOAD_DIR]:
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+# 删除与讯飞API相关的函数和配置
+
 @app.route('/')
-def home():
-    return "欢迎使用Flask应用！"
+def index():
+    return "WebSocket 服务器正在运行"
 
 @app.route('/generate-voice', methods=['POST'])
+@cross_origin()
 def generate_voice():
     try:
         text = request.json.get('text')
         if not text:
+            print("错误：未提供文本")
             return jsonify({'error': '未提供文本'}), 400
 
-        # 生成新的语音文件
-        tts = gTTS(text=text, lang='en')
-        audio_filename = f"{uuid.uuid4()}.mp3"
-        audio_path = os.path.join(AUDIO_DIR, audio_filename)
-        tts.save(audio_path)
+        print(f"接收到的文本: {text}")
+
+        # 使用gTTS生成语音
+        try:
+            tts = gTTS(text=text, lang='en')
+            audio_filename = f"{uuid.uuid4()}.mp3"
+            audio_path = os.path.join(AUDIO_DIR, audio_filename)
+            print(f"尝试保存音频文件到: {audio_path}")
+            tts.save(audio_path)
+            print("音频文件保存成功")
+        except Exception as e:
+            print(f"生成或保存语音文件时出错: {str(e)}")
+            return jsonify({'error': '生成语音文件时出错'}), 500
 
         # 返回音频文件的URL
         audio_url = f'/audio/{audio_filename}'
+        print(f"生成的音频URL: {audio_url}")
         return jsonify({'audio_url': audio_url}), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"生成语音时发生未知错误: {str(e)}")
+        return jsonify({'error': '服务器内部错误'}), 500
 
 @app.route('/audio/<filename>', methods=['GET'])
+@cross_origin()  # 添加这行
 def serve_audio(filename):
     return send_from_directory(AUDIO_DIR, filename, mimetype='audio/mpeg')
 
@@ -102,4 +127,4 @@ def compare_audio(file1_path, file2_path):
     return similarity
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True, port=5000)  # 修改端口为 5000
+    socketio.run(app, host='0.0.0.0', port=5000)

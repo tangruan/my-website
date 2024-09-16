@@ -16,22 +16,22 @@
 </head>
 
 <body>
-    <div id="loading-indicator" style="display: none;">加载中...</div>
-    <nav>
-        <div class="logo">AI 练习</div>
+    <div id="loading-indicator" style="display: none;" role="status" aria-live="polite">加载中...</div>
+    <nav role="navigation" aria-label="主导航">
+        <div class="logo" role="banner">AI 练习</div>
         <ul class="nav-links">
-            <li><a href="#home" data-text="首页">首页</a></li>
-            <li><a href="#ai-voice" data-text="AI 语音">AI 语音</a></li>
-            <li><a href="#record" data-text="录音">录音</a></li>
-            <li><a href="#analysis" data-text="分析">分析</a></li>
-            <li><a href="#feedback" data-text="反馈">反馈</a></li>
+            <li><a href="#home" data-text="首页" role="menuitem">首页</a></li>
+            <li><a href="#ai-voice" data-text="AI 语音" role="menuitem">AI 语音</a></li>
+            <li><a href="#record" data-text="录音" role="menuitem">录音</a></li>
+            <li><a href="#analysis" data-text="分析" role="menuitem">分析</a></li>
+            <li><a href="#feedback" data-text="反馈" role="menuitem">反馈</a></li>
         </ul>
     </nav>
 
-    <main>
-        <section id="home" class="section">
-            <h1><span class="welcome-text">欢迎使用</span> <span class="ai-text">AI 发音练习工具</span></h1>
-            <div class="introduction">
+    <main role="main">
+        <section id="home" class="section" aria-labelledby="home-title">
+            <h1 id="home-title"><span class="welcome-text">欢迎使用</span> <span class="ai-text">AI 发音练习工具</span></h1>
+            <div class="introduction" role="region" aria-label="使用说明">
                 <p>1. 选择我们推荐的英文文章或输入文本，我们将提供ai发音音频</p>
                 <p>2. 在页面的录音部分，您可以生成自己的作品</p>
                 <p>3. 通过比较两个文件之间发音的差异，AI将帮忙指出如何做到更好</p>
@@ -39,56 +39,57 @@
             </div>
         </section>
 
-        <section id="ai-voice" class="section">
-            <h2>AI 角色配音</h2>
-            <textarea id="text-input" placeholder="在此输入您的句子..."></textarea>
-            <input type="file" id="file-input" accept=".txt" style="display: none;">
-            <button onclick="AudioApp.generateAIVoice()">生成AI配音</button>
-            <audio id="ai-audio" controls></audio>
+        <section id="ai-voice" class="section" aria-labelledby="ai-voice-title">
+            <h2 id="ai-voice-title">AI 角色配音</h2>
+            <textarea id="text-input" placeholder="在此输入您的句子..." aria-label="输入文本"></textarea>
+            <input type="file" id="file-input" accept=".txt" style="display: none;" aria-label="上传文本文件">
+            <button onclick="AudioApp.generateAIVoice()" aria-label="生成AI配音">生成AI配音</button>
+            <audio id="ai-audio" controls aria-label="AI配音音频"></audio>
 
             <div class="articles-container">
-                <h3>英文文章</h3>
-                <ul id="articles-list"></ul>
+                <h3 id="articles-title">英文文章</h3>
+                <ul id="articles-list" aria-labelledby="articles-title"></ul>
+            </div>
+
+            <div id="ai-response" aria-live="polite"></div>
+        </section>
+
+        <section id="record" class="section" aria-labelledby="record-title">
+            <h2 id="record-title">个人录音</h2>
+            <textarea id="record-text-input" placeholder="录音文本将自动同步到这里..." readonly aria-label="录音文本"></textarea>
+            <audio id="personal-audio" controls aria-label="个人录音音频"></audio>
+            <div class="record-buttons" role="group" aria-label="录音控制">
+                <button class="icon-button" onclick="AudioApp.retryRecording()" title="重新录音" aria-label="重新录音">
+                    <i class="fas fa-redo" aria-hidden="true"></i>
+                </button>
+                <button class="icon-button" onclick="AudioApp.startRecording()" title="开始录音" aria-label="开始录音">
+                    <i class="fas fa-microphone" aria-hidden="true"></i>
+                </button>
+                <button class="icon-button" onclick="AudioApp.stopRecording()" title="停止录音" aria-label="停止录音">
+                    <i class="fas fa-stop" aria-hidden="true"></i>
+                </button>
+                <button class="icon-button" onclick="AudioApp.uploadRecording()" title="上传录音" aria-label="上传录音">
+                    <i class="fas fa-upload" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div id="record-status" role="status" aria-live="polite"></div>
+        </section>
+
+        <section id="analysis" class="section" aria-labelledby="analysis-title">
+            <h2 id="analysis-title">对比和分析</h2>
+            <div id="waveform-comparison" aria-label="音频波形对比">
+                <div id="ai-waveform" aria-label="AI音频波形"></div>
+                <div id="personal-waveform" aria-label="个人录音波形"></div>
+            </div>
+            <div id="feedback" role="region" aria-label="分析反馈">
+                <p id="analysis-feedback" aria-live="polite">这里将显示基于分析的反馈和建议。</p>
+                <ul id="improvement-tips" aria-label="改进建议"></ul>
             </div>
         </section>
 
-        <section id="record" class="section">
-            <h2>个人录音</h2>
-            <textarea id="record-text-input" placeholder="录音文本将自动同步到这里..."></textarea>
-            <audio id="personal-audio" controls></audio>
-            <div class="record-buttons">
-                <button class="icon-button" onclick="AudioApp.retryRecording()" title="重新录音">
-                    <i class="fas fa-redo"></i>
-                </button>
-                <button class="icon-button" onclick="AudioApp.startRecording()" title="开始录音">
-                    <i class="fas fa-microphone"></i>
-                </button>
-                <button class="icon-button" onclick="AudioApp.stopRecording()" title="停止录音">
-                    <i class="fas fa-stop"></i>
-                </button>
-                <button class="icon-button" onclick="AudioApp.uploadRecording()" title="上传录音">
-                    <i class="fas fa-upload"></i>
-                </button>
-            </div>
-            <div id="record-status"></div>
-        </section>
-
-        <section id="analysis" class="section">
-            <h2>对比和分析</h2>
-            <div id="waveform-comparison">
-                <div id="ai-waveform"></div>
-                <div id="personal-waveform"></div>
-            </div>
-            <div id="feedback">
-                <p id="analysis-feedback">这里将显示基于分析的反馈和建议。</p>
-                <ul id="improvement-tips"></ul>
-            </div>
-        </section>
-
-        <section id="feedback" class="section">
-            <h2>结果和反馈</h2>
-            <p id="performance-feedback">这里将显示您的表现反馈。</p>
-            <!-- 移除了重新录音按钮 -->
+        <section id="feedback" class="section" aria-labelledby="feedback-title">
+            <h2 id="feedback-title">结果和反馈</h2>
+            <p id="performance-feedback" aria-live="polite">这里将显示您的表现反馈。</p>
         </section>
     </main>
 
@@ -96,11 +97,12 @@
     <script src="js/script.js"></script>
     <script src="js/recording.js"></script>
     <script src="js/aiVoice.js"></script>
+    <script src="js/audioWorker.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // 初始化 socket 连接
-            window.socket = io('http://localhost:5000', {  // 修改端口为 5000
-                transports: ['websocket', 'polling']
+            window.socket = io('http://localhost:5000', {
+                transports: ['websocket']
             });
 
             window.socket.on('connect', () => {
@@ -110,12 +112,6 @@
                     window.AudioApp.init();
                 } else {
                     console.error('AudioApp 或 init 方法未定义');
-                }
-                // 在这里初始化 AI 语音功能
-                if (window.AudioApp && window.AudioApp.initAiVoice) {
-                    window.AudioApp.initAiVoice();
-                } else {
-                    console.error('AudioApp 或 initAiVoice 方法未定义');
                 }
             });
 
